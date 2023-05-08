@@ -31,7 +31,7 @@ public class StocksService {
         String resposne = restTemplate.getForObject(url, String.class);
         JsonObject jsonObject = JsonParser.parseString(resposne).getAsJsonObject();
       //  JsonObject resposne = restTemplate.getForObject(url, JsonObject.class);
-
+        
         return jsonObject.get("summary").toString();
     }
 
