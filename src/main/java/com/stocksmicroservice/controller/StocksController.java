@@ -1,5 +1,7 @@
-package com.stocksmicroservice;
+package com.stocksmicroservice.controller;
 
+import com.stocksmicroservice.services.StocksService;
+import com.stocksmicroservice.collections.Stock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,14 +18,14 @@ public class StocksController {
         this.stocksService = stocksService;
     }
 
-    @GetMapping
-    public String fetchStocksFromAPI(){
-       return  stocksService.fetchStockData();
+    @PostMapping
+    public void fetchStocksFromAPI(){
+       stocksService.fetchStockData();
     }
 
 
-//    @GetMapping
-//    public List<Stock> GetStocks(){
-//        return stocksService.getAllStocks();
-//    }
+    @GetMapping
+    public List<Stock> GetStocks(){
+        return stocksService.getAllStocks();
+    }
 }

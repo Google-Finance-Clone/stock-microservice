@@ -1,11 +1,18 @@
-package com.stocksmicroservice;
+package com.stocksmicroservice.services;
 
-import org.apache.tomcat.util.http.parser.Authorization;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.fasterxml.jackson.databind.util.JSONWrappedObject;
+import com.google.gson.JsonObject;
+import com.stocksmicroservice.collections.Stock;
+import com.stocksmicroservice.repositories.StocksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+
+
+
 
 
 import java.util.List;
@@ -19,7 +26,21 @@ public class StocksService {
     private String apiLink;
     private String apiKey;
 
-    public String fetchStockData(){
+    private void getAllTickers()
+    {
+        String url = "https://api.polygon.io/v3/reference/tickers?market=stocks&active=true&limit=1000&apiKey=qcVQuyN5MfYsyq_nuJil83LIoWXDepPo";
+        JsonObject response = restTemplate.getForObject(url, JsonObject.class);
+        JsonObject results = response.get("results").getAsJsonObject();
+        for (JsonElement stockElement: results.getAsJsonArray())
+        {
+            JsonObject stockJson = stockElement.getAsJsonObject();
+
+        }
+
+    }
+
+    public void fetchStockData(){
+
         String url = "https://api.polygon.io/v1/open-close/TSLA/2023-01-09?adjusted=true&";
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setBearerAuth(apiKey);
@@ -27,7 +48,6 @@ public class StocksService {
 //        String response = restTemplate.getForObject(url, String.class,requestEntity);
         url+="apikey=" + apiKey;
         String resposne = restTemplate.getForObject(url, String.class);
-        return resposne;
     }
 
     @Autowired
