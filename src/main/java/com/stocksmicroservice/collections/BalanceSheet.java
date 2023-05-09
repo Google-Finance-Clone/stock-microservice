@@ -10,4 +10,11 @@ public class BalanceSheet {
     private String returnOnAssets;
     private String returnOnCapital;
 
+    public BalanceSheet() {
+    }
+
+    @Override
+    public String toString() {
+        return "BalanceSheet{}";
+    }
 }

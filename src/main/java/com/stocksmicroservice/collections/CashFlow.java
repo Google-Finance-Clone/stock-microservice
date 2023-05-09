@@ -9,4 +9,7 @@ public class CashFlow {
     private String freeCashFlow;
     private String data;
 
+    public CashFlow() {
+    }
+
 }

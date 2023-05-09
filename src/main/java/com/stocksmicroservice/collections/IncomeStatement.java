@@ -10,4 +10,6 @@ public class IncomeStatement {
     private String effectiveTaxRate;
     private String data;
 
+    public IncomeStatement() {
+    }
 }
