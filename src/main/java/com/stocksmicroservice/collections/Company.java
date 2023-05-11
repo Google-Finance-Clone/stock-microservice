@@ -1,5 +1,12 @@
 package com.stocksmicroservice.collections;
 
+import lombok.Data;
+import lombok.ToString;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Data
+@Document
+@ToString
 public class Company {
     private String name;
     private String description;
@@ -18,12 +25,5 @@ public class Company {
         this.headquarters = "headquarters";
         this.website = "website";
         this.employees = "employees";
-    }
-
-    @Override
-    public String toString() {
-        return "Company{" +
-                "name='" + name + '\'' +
-                '}';
     }
 }
