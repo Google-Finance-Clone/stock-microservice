@@ -1,5 +1,10 @@
 package com.stocksmicroservice.collections;
 
+import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Data
+@Document
 public class BalanceSheet {
     private String CashAndShortTermInvestments;
     private String totalAssets;

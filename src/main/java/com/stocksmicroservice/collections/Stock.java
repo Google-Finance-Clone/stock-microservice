@@ -1,6 +1,7 @@
 package com.stocksmicroservice.collections;
 
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -30,7 +31,7 @@ public class Stock {
         this.Low = Low;
         this.Open = Open;
         this.Close = Close;
-        this. Volume = Volume;
+        this.Volume = Volume;
         this.AdjClose = AdjClose;
     }
 
