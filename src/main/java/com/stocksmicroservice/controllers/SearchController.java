@@ -22,9 +22,8 @@ public class SearchController {
 
     @GetMapping("/findById")
     public Optional<Stock> findStockById(@RequestParam("id") String message) {
-        Optional<Stock> singleStock = searchService.getSingleStockById(message);
 
-        return singleStock;
+        return searchService.getSingleStockById(message);
     }
 
 
@@ -33,9 +32,8 @@ public class SearchController {
     @GetMapping("/findByTitle")
     public String findStockByTitle(@RequestParam("title") String message) {
         List<Stock> stocks = searchService.getStockByTitle(message);
-        String result = stocks.toString();
 
-        return result;
+        return stocks.toString();
     }
 
 

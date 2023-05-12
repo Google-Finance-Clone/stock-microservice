@@ -10,10 +10,7 @@ import java.util.List;
 @Repository
 public interface StocksRepository extends MongoRepository<Stock, String> {
 
-    @Aggregation(pipeline = {
-            "{$search: {text: {query: ?0, path: 'title'}}}",
-            "{$project: {_id: 0}}",
-            "{$limit: 10}"
-    })
+// match title with autocomplete
+    @Aggregation(pipeline = {"{$match: {title: {$regex: ?0, $options: 'i'}}}"})
     List<Stock> findByTitle(String title);
 }
