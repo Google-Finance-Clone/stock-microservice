@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 @RestController
 @EnableRabbit
-@RequestMapping("/search")
+@RequestMapping("/stocks")
 public class SearchController {
 
     private final SearchService searchService;
@@ -32,6 +32,14 @@ public class SearchController {
     @GetMapping("/findByTitle")
     public String findStockByTitle(@RequestParam("title") String message) {
         List<Stock> stocks = searchService.getStockByTitle(message);
+
+        return stocks.toString();
+    }
+
+//find stock by title or stock
+    @GetMapping("/search")
+    public String findStockByTitleOrStock(@RequestParam("query") String title) {
+        List<Stock> stocks = searchService.getStockByTitleOrStock(title, title);
 
         return stocks.toString();
     }

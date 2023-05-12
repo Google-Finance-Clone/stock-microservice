@@ -31,5 +31,10 @@ public class SearchService {
 
     }
 
+//    get stock by title or stock
+    public List<Stock> getStockByTitleOrStock(String title, String stock ) {
+        return stocksRepository.findByTitleOrStock(title, stock);
+    }
+
 
 }
