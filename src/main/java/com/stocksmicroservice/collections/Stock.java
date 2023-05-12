@@ -1,6 +1,7 @@
 package com.stocksmicroservice.collections;
 
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -8,6 +9,7 @@ import java.util.Arrays;
 
 @Data
 @Document
+@ToString
 public class Stock {
     @Id
     private String id;
@@ -52,32 +54,6 @@ public class Stock {
         this.balanceSheet = balanceSheet;
         this.cashFlow = cashFlow;
         this.incomeStatement = incomeStatement;
-    }
-
-    @Override
-    public String toString() {
-        return "Stock{" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", stock='" + stock + '\'' +
-                ", exchange='" + exchange + '\'' +
-                ", price='" + price + '\'' +
-                ", extensions=" + Arrays.toString(extensions) +
-                ", graph=" + Arrays.toString(graph) +
-                ", tags=" + Arrays.toString(tags) +
-                ", previousClose='" + previousClose + '\'' +
-                ", dayRange='" + dayRange + '\'' +
-                ", yearRange='" + yearRange + '\'' +
-                ", marketCap='" + marketCap + '\'' +
-                ", avgVolume='" + avgVolume + '\'' +
-                ", peRatio='" + peRatio + '\'' +
-                ", dividendYield='" + dividendYield + '\'' +
-                ", primaryExchange='" + primaryExchange + '\'' +
-                ", companyInfo=" + "companyInfo" +
-                ", balanceSheet=" + "balanceSheet" +
-                ", cashFlow=" + "cashFlow" +
-                ", incomeStatement=" + "incomeStatement" +
-                '}';
     }
 
 }

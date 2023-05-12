@@ -24,33 +24,12 @@ public class SearchService {
         return stocksRepository.findById(Id);
     }
 
+//    get stock by title
+    public List<Stock> getStockByTitle(String title ) {
+        return stocksRepository.findByTitle(title);
 
-//    public List<Stock> getFilteredStocksByName(String searchTerm){
-//
-//        // Construct the query
-//        Document query = new Document();
-//        query.append("title", new Document("$regex", searchTerm).append("$options", "i"));
-//
-//
-//
-//        return stocksRepository.findBy(query);
-//
-//
-//
-////        Predicate predicate = Stocks.title.equalsIgnoreCase("dave");
-////
-////        stocksRepository.findAll(predicate);
-//
-//        // Predicate predicate = Stock.stock.startsWithIgnoreCase(message);
-//        // .and(user.lastname.startsWithIgnoreCase("mathews"));
-//
-//
-//        //Document query = new Document();
-//        // query.append("name", new Document("$regex", searchTerm).append("$options", "i"));
-//
-//        //return stocksRepository.findAll({"stock": message});
-//        // return stocksRepository.findAll(predicate);
-//
-//    }
+
+    }
+
 
 }

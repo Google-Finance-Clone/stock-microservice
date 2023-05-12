@@ -28,18 +28,17 @@ public class SearchController {
     }
 
 
-//    @GetMapping("/search")
-//    public String searchStock(@RequestParam("id") String message) {
-//        // List<Stock> stocks = stocksService.getFilteredStocks(message);
-//
-//        List<Stock> stocks = searchService.getFilteredStocksByName(message);
-//
-//        String result = "";
-//        for (Stock stock : stocks)
-//            result += stock.toString();
-//
-//        return result;
-//    }
+
+//find stock by title
+    @GetMapping("/findByTitle")
+    public String findStockByTitle(@RequestParam("title") String message) {
+        List<Stock> stocks = searchService.getStockByTitle(message);
+        String result = stocks.toString();
+
+        return result;
+    }
+
+
 
 
 
