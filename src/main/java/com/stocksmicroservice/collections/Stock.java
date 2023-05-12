@@ -3,81 +3,48 @@ package com.stocksmicroservice.collections;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Arrays;
+import java.util.Date;
 
 @Data
-@Document
+@Document(collection = "stocks")
 public class Stock {
     @Id
     private String id;
-    private String title;
-    private String stock;
-    private String exchange;
-    private String price;
-    private String[] extensions;
-    private StockGraph[] graph;
-    private String[] tags;
-    private String previousClose;
-    private String dayRange;
-    private String yearRange;
-    private String marketCap;
-    private String avgVolume;
-    private String peRatio;
-    private String dividendYield;
-    private String primaryExchange;
-    private Company companyInfo;
-    private BalanceSheet balanceSheet;
-    private CashFlow cashFlow;
-    private IncomeStatement incomeStatement;
+    private String Ticker;
+    private String Date;
+    private double High;
+    private double Low;
+    private double Open;
+    private double Close;
+    private long Volume;
+    @Field("Adj Close")
+    private double AdjClose;
 
-
-    public Stock(String title, String stock, String exchange, String price, String[] extensions, StockGraph[] graph, String[] tags, String previousClose, String dayRange, String yearRange, String marketCap, String avgVolume, String peRatio, String dividendYield, String primaryExchange, Company companyInfo, BalanceSheet balanceSheet, CashFlow cashFlow, IncomeStatement incomeStatement) {
-        this.title = title;
-        this.stock = stock;
-        this.exchange = exchange;
-        this.price = price;
-        this.extensions = extensions;
-        this.graph = graph;
-        this.tags = tags;
-        this.previousClose = previousClose;
-        this.dayRange = dayRange;
-        this.yearRange = yearRange;
-        this.marketCap = marketCap;
-        this.avgVolume = avgVolume;
-        this.peRatio = peRatio;
-        this.dividendYield = dividendYield;
-        this.primaryExchange = primaryExchange;
-        this.companyInfo = companyInfo;
-        this.balanceSheet = balanceSheet;
-        this.cashFlow = cashFlow;
-        this.incomeStatement = incomeStatement;
+    public Stock(String Ticker, String Date, double High, double Low, double Open, double Close, long Volume, double AdjClose) {
+        this.Ticker = Ticker;
+        this.Date = Date;
+        this.High = High;
+        this.Low = Low;
+        this.Open = Open;
+        this.Close = Close;
+        this. Volume = Volume;
+        this.AdjClose = AdjClose;
     }
 
     @Override
     public String toString() {
         return "Stock{" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", stock='" + stock + '\'' +
-                ", exchange='" + exchange + '\'' +
-                ", price='" + price + '\'' +
-                ", extensions=" + Arrays.toString(extensions) +
-                ", graph=" + Arrays.toString(graph) +
-                ", tags=" + Arrays.toString(tags) +
-                ", previousClose='" + previousClose + '\'' +
-                ", dayRange='" + dayRange + '\'' +
-                ", yearRange='" + yearRange + '\'' +
-                ", marketCap='" + marketCap + '\'' +
-                ", avgVolume='" + avgVolume + '\'' +
-                ", peRatio='" + peRatio + '\'' +
-                ", dividendYield='" + dividendYield + '\'' +
-                ", primaryExchange='" + primaryExchange + '\'' +
-                ", companyInfo=" + "companyInfo" +
-                ", balanceSheet=" + "balanceSheet" +
-                ", cashFlow=" + "cashFlow" +
-                ", incomeStatement=" + "incomeStatement" +
+                "Ticker='" + Ticker + '\'' +
+                ", Date='" + Date + '\'' +
+                ", High=" + High +
+                ", Low=" + Low +
+                ", Open=" + Open +
+                ", Close=" + Close +
+                ", volume=" + Volume +
+                ", AdjClose=" + AdjClose +
                 '}';
     }
-
 }

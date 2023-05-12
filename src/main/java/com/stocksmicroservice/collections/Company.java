@@ -1,29 +1,58 @@
 package com.stocksmicroservice.collections;
 
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+@Data
+@Document(collection = "companies")
 public class Company {
-    private String name;
+    @Id
+    private String id;
+    private String ticker;
+    @Field("company name")
+    private String companyName;
+    @Field("short name")
+    private String shortName;
+    private String industry;
     private String description;
-    private String ceo;
-    private String founded;
-    private String headquarters;
     private String website;
-    private String employees;
+    private String logo;
+    private String ceo;
+    private String exchange;
+    @Field("market cap")
+    private long marketCap;
+    private String sector;
 
-
-    public Company(String name) {
-        this.name = name;
-        this.description = "description";
-        this.ceo = "ceo";
-        this.founded = "founded";
-        this.headquarters = "headquarters";
-        this.website = "website";
-        this.employees = "employees";
+    public Company(String ticker, String companyName, String shortName, String industry, String description, String website, String logo, String ceo, String exchange, long marketCap, String sector) {
+        this.ticker = ticker;
+        this.companyName = companyName;
+        this.shortName = shortName;
+        this.industry = industry;
+        this.description = description;
+        this.website = website;
+        this.logo = logo;
+        this.ceo = ceo;
+        this.exchange = exchange;
+        this.marketCap = marketCap;
+        this.sector = sector;
     }
 
     @Override
     public String toString() {
         return "Company{" +
-                "name='" + name + '\'' +
+                "ticker='" + ticker + '\'' +
+                ", companyName='" + companyName + '\'' +
+                ", shortName='" + shortName + '\'' +
+                ", industry='" + industry + '\'' +
+                ", description='" + description + '\'' +
+                ", website='" + website + '\'' +
+                ", logo='" + logo + '\'' +
+                ", ceo='" + ceo + '\'' +
+                ", exchange='" + exchange + '\'' +
+                ", marketCap=" + marketCap +
+                ", sector='" + sector + '\'' +
                 '}';
     }
 }

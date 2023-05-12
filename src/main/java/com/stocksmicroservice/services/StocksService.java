@@ -3,13 +3,22 @@ package com.stocksmicroservice.services;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.stocksmicroservice.collections.*;
+import com.stocksmicroservice.repositories.CompanyRepository;
 import com.stocksmicroservice.repositories.StocksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.sql.Array;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
+
+import javax.management.Query;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StocksService {
@@ -17,8 +26,8 @@ public class StocksService {
 
     private final StocksRepository stocksRepository;
     private final RestTemplate restTemplate;
-    private String apiLink;
-    private String apiKey;
+    private final CompanyRepository companyRepository;
+    private String today;
 
     public String fetchStockData() {
         //   String url = "https://api.polygon.io/v1/open-close/TSLA/2023-01-09?adjusted=true&";
@@ -35,27 +44,229 @@ public class StocksService {
         return jsonObject.get("summary").toString();
     }
 
+    private Stock getRecentStockValue(String ticker)
+    {
+        return stocksRepository.findByTickerAndDate(ticker, today);
+    }
+
     @Autowired
-    public StocksService(StocksRepository stocksRepository, RestTemplate restTemplate) {
+    public StocksService(StocksRepository stocksRepository, CompanyRepository companyRepository, RestTemplate restTemplate) {
         this.stocksRepository = stocksRepository;
+        this.companyRepository = companyRepository;
         this.restTemplate = restTemplate;
-        this.apiLink = "https://api.polygon.io/";
-        this.apiKey = "qcVQuyN5MfYsyq_nuJil83LIoWXDepPo";
+        this.today = "2022-04-14";
     }
 
-    public String getElementsFoDB() {
-        String result = stocksRepository.findAll().toString();
-        System.out.println(result);
-        return result;
-
-    }
 
     public List<Stock> getAllStocks() {
         return stocksRepository.findAll();
     }
 
-    public void addNewStock() {
-        Stock newStock = new Stock("TST", "Test", "NASSDAQ", "40", new String[1], new StockGraph[1], new String[1], "30", "day", "year", "10000", "40000", "0.2", "0.4", "NASDAQ", new Company("test"), new BalanceSheet(), new CashFlow(), new IncomeStatement());
-        stocksRepository.insert(newStock);
+    public Stock getStockDataOnDate(String ticker, String date) {
+        return stocksRepository.findByTickerAndDate(ticker, date);
+    }
+
+    public Company getCompanyData(String ticker) {
+        return companyRepository.findByTicker(ticker);
+    }
+
+    public ArrayList<Stock> getStockGraph(String ticker, String interval) {
+        String[] date = today.split("-");
+        int year = Integer.parseInt(date[0]);
+        int month = Integer.parseInt(date[1]);
+        int day = Integer.parseInt(date[2]);
+        ArrayList<Stock> result = new ArrayList<Stock>();
+        result.add(stocksRepository.findByTickerAndDate(ticker, today));
+        if(interval.equals("annual"))
+        {
+            for(int i = 0; i < 5; i++)
+            {
+                year--;
+                String dayString;
+                String monthString;
+                if(day<10)
+                {
+                    dayString = "0" + day;
+                }
+                else {
+                    dayString = "" + day;
+                }
+                if(month<10)
+                {
+                    monthString = "0" + month;
+                }
+                else
+                {
+                    monthString = "" + month;
+                }
+                String newDate = year + "-" + monthString + "-" + dayString;
+                System.out.println(ticker + " " + newDate);
+                Stock newStock = stocksRepository.findByTickerAndDate(ticker, newDate);
+                System.out.println(newStock);
+                if(newStock != null)
+                {
+                    result.add(newStock);
+                }
+                else
+                {
+                   day+=2;
+                    if(day<10)
+                    {
+                        dayString = "0" + day;
+                    }
+                    else {
+                        dayString = "" + day;
+                    }
+                    if(month<10)
+                    {
+                        monthString = "0" + month;
+                    }
+                    else
+                    {
+                        monthString = "" + month;
+                    }
+                   newDate = year + "-" + monthString + "-" + dayString;
+                   newStock = stocksRepository.findByTickerAndDate(ticker, newDate);
+                   if(newStock != null)
+                       result.add(newStock);
+                }
+            }
+        }
+        else if(interval.equals("monthly"))
+        {
+            for(int i = 0; i < 12; i++)
+            {
+                if(month < 1)
+                {
+                    month = 12;
+                    year--;
+                }
+                else
+                {
+                    month--;
+                }
+                String dayString;
+                String monthString;
+                if(day<10)
+                {
+                    dayString = "0" + day;
+                }
+                else {
+                    dayString = "" + day;
+                }
+                if(month<10)
+                {
+                    monthString = "0" + month;
+                }
+                else
+                {
+                    monthString = "" + month;
+                }
+                String newDate = year + "-" + monthString + "-" + dayString;
+                Stock newStock = stocksRepository.findByTickerAndDate(ticker, newDate);
+                if(newStock != null)
+                {
+                    result.add(newStock);
+                }
+                else
+                {
+                    day+=2;
+                    if(day<10)
+                    {
+                        dayString = "0" + day;
+                    }
+                    else {
+                        dayString = "" + day;
+                    }
+                    if(month<10)
+                    {
+                        monthString = "0" + month;
+                    }
+                    else
+                    {
+                        monthString = "" + month;
+                    }
+                    newDate = year + "-" + monthString + "-" + dayString;;
+                    newStock = stocksRepository.findByTickerAndDate(ticker, newDate);
+                    if(newStock != null)
+                        result.add(newStock);
+                }
+            }
+        }
+        else if(interval.equals("daily"))
+        {
+            for(int i = 0; i< 30; i++)
+            {
+                if(day < 1)
+                {
+                    day = 31;
+                    if(month < 1)
+                    {
+                        month = 12;
+                        year--;
+                    }
+                    else
+                    {
+                        month--;
+                    }
+                }
+                else
+                {
+                    day--;
+                }
+                String dayString;
+                String monthString;
+                if(day<10)
+                {
+                    dayString = "0" + day;
+                }
+                else {
+                    dayString = "" + day;
+                }
+                if(month<10)
+                {
+                    monthString = "0" + month;
+                }
+                else
+                {
+                    monthString = "" + month;
+                }
+                String newDate = year + "-" + monthString + "-" + dayString;
+                Stock newStock = stocksRepository.findByTickerAndDate(ticker, newDate);
+                if(newStock != null)
+                {
+                    result.add(newStock);
+                }
+                else
+                {
+                    day+=2;
+                    if(day<10)
+                    {
+                        dayString = "0" + day;
+                    }
+                    else {
+                        dayString = "" + day;
+                    }
+                    if(month<10)
+                    {
+                        monthString = "0" + month;
+                    }
+                    else
+                    {
+                        monthString = "" + month;
+                    }
+                    newDate = year + "-" + month + "-" + day;
+                    newStock = stocksRepository.findByTickerAndDate(ticker, newDate);
+                    if(newStock != null)
+                        result.add(newStock);
+                }
+            }
+        }
+        return result;
+    }
+
+
+    public Stock getCurrentPrice(String ticker) {
+        return stocksRepository.findByTickerAndDate(ticker, today);
     }
 }
