@@ -66,6 +66,12 @@ public class StocksService {
         return stocksRepository.findByTickerAndDate(ticker, date);
     }
 
+    public double getCloseOnDay(String ticker, String date) {
+        Stock stock = stocksRepository.findByTickerAndDate(ticker, date);
+        return stock.getClose();
+    }
+
+
     public Company getCompanyData(String ticker) {
         return companyRepository.findByTicker(ticker);
     }

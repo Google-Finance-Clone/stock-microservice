@@ -36,6 +36,12 @@ public class StocksController {
         return "Message sent to the RabbitMQ Successfully";
     }
 
+    @GetMapping("/close/{ticker}/{date}")
+    public double getClosePrice(@PathVariable String ticker, @PathVariable String date)
+    {
+        return stocksService.getCloseOnDay(ticker, date);
+    }
+
     @GetMapping("/{ticker}")
     public Stock getCurrentPrice(@PathVariable String ticker)
     {
