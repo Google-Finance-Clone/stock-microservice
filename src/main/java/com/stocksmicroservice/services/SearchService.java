@@ -8,6 +8,7 @@ import com.stocksmicroservice.repositories.StocksRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,5 +39,17 @@ public class SearchService {
     public Stock getStockData(String ticker) {
         List<Stock> stock = stocksRepository.findByTicker(ticker);
         return stock.get(0);
+    }
+
+    public List<Stock> searchWithQuery(String title) {
+        List<Company> companies = searchCompany(title);
+        List<Stock> stocks = new ArrayList<>();
+
+//      for each company, get the stock data and add it to the company object
+        for (Company company : companies) {
+            Stock stock = getStockData(company.getTicker());
+            stocks.add(stock);
+        }
+        return stocks;
     }
 }
