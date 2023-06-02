@@ -22,14 +22,42 @@ public class StocksController {
 
     private final StocksService stocksService;
 
+    private final Object lock = new Object();
+    private boolean freezeFlag = false;
+
+
     @Autowired
     MQSender mqSender;
 
     @Autowired
     public StocksController(StocksService stocksService) {
         this.stocksService = stocksService;
+        System.out.print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" + " " + freezeFlag );
+
     }
 
+    @PostMapping("/freeze")
+    public boolean freeze() {
+        System.out.print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" + " " + freezeFlag );
+
+        synchronized (lock) {
+            freezeFlag = true;
+            stocksService.freeze();
+        }
+        return freezeFlag;
+    }
+
+    @PostMapping("/unfreeze")
+    public boolean unfreeze() {
+        System.out.print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" + " " + freezeFlag );
+
+        synchronized (lock) {
+            freezeFlag = false;
+            lock.notifyAll();
+            stocksService.unfreeze();
+        }
+        return freezeFlag;
+    }
 
     public String sendToQueue(String message) {
         mqSender.send(message);
