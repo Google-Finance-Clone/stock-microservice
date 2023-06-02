@@ -63,22 +63,22 @@ public class StocksService {
         return stocksRepository.findAll();
     }
 
-    @Cacheable("stocks")
+    @Cacheable(unless="#result == null", value ="stocks")
     public Stock getStockDataOnDate(String ticker, String date) {
         return stocksRepository.findByTickerAndDate(ticker, date);
     }
-    @Cacheable("stockCloses")
+    @Cacheable(unless="#result == null", value ="stockCloses")
     public double getCloseOnDay(String ticker, String date) {
         Stock stock = stocksRepository.findByTickerAndDate(ticker, date);
         return stock.getClose();
     }
 
-    @Cacheable("companies")
+    @Cacheable(unless="#result == null", value ="companies")
     public Company getCompanyData(String ticker) {
         return companyRepository.findByTicker(ticker);
     }
 
-    @Cacheable("stockGraphs")
+    @Cacheable(unless="#result == null", value = "stockGraphs")
     public ArrayList<Stock> getStockGraph(String ticker, String interval) {
         String[] date = today.split("-");
         int year = Integer.parseInt(date[0]);
@@ -274,7 +274,7 @@ public class StocksService {
         return result;
     }
 
-    @Cacheable("stockPrices")
+    @Cacheable(unless="#result == null", value ="stockPrices")
     public Stock getCurrentPrice(String ticker) {
         return stocksRepository.findByTickerAndDate(ticker, today);
     }

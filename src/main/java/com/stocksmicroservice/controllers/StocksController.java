@@ -13,6 +13,7 @@ import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
@@ -55,7 +56,7 @@ public class StocksController {
         return "Message sent to the RabbitMQ Successfully";
     }
 
-    @RabbitListener(queues = "stocksSender")
+    @RabbitListener(queues = "stocksSender1")
     public String receiveMessage(String message) {
 
         System.out.println("message received");
@@ -91,28 +92,42 @@ public class StocksController {
                 double res = stocksService.getCloseOnDay(ticker, date);
                 responseValue = String.valueOf(res);
                 return responseValue;
-                //return response as JSON
             }
             case "company": {
                 String ticker = routeSplit[2];
                 Company res = stocksService.getCompanyData(ticker);
-                responseValue = gson.toJson(res);
+                if(res != null)
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given date";
                 return responseValue;
             }
             case "graph": {
                 String interval = routeSplit[2];
                 String ticker = routeSplit[3];
-                responseValue = gson.toJson(stocksService.getStockGraph(ticker, interval));
+                ArrayList<Stock> res = stocksService.getStockGraph(ticker, interval);
+                if(res != null)
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given date";
                 return responseValue;
             }
             case "search": {
                 String query = routeSplit[2];
-                responseValue = gson.toJson(searchService.searchWithQuery(query));
+                List<Stock> res = searchService.searchWithQuery(query);
+                if(res != null)
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given date";
                 return responseValue;
             }
             case "findById": {
                 String id = routeSplit[2];
-                responseValue = gson.toJson(searchService.getSingleStockById(id));
+                Optional<Stock> res = searchService.getSingleStockById(id);
+                if(res.isPresent())
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given id";
                 return responseValue;
             }
             default: {
@@ -120,7 +135,11 @@ public class StocksController {
                 if (routeSplit.length == 2) {
                     System.out.println("You Are Here");
                     String ticker = routeSplit[1];
-                    responseValue = gson.toJson(stocksService.getCurrentPrice(ticker));
+                    Stock res = stocksService.getCurrentPrice(ticker);
+                    if(res != null)
+                        responseValue = gson.toJson(res);
+                    else
+                        responseValue = "No data found for the given date";
                     System.out.println("The response value is "+ responseValue);
 //                    print the type of the response value
                     System.out.println("The type of the response value is "+ responseValue.getClass().getName());
@@ -130,7 +149,11 @@ public class StocksController {
                 else {
                     String ticker = routeSplit[1];
                     String date = routeSplit[2];
-                    responseValue = gson.toJson(stocksService.getStockDataOnDate(ticker, date));
+                    Stock res = stocksService.getStockDataOnDate(ticker, date);
+                    if(res != null)
+                        responseValue = gson.toJson(res);
+                    else
+                        responseValue = "No data found for the given date";
                     return responseValue;
                 }
             }

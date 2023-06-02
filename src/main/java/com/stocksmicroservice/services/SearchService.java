@@ -24,23 +24,24 @@ public class SearchService {
     }
 
 
-    @Cacheable("stockSearchResponses")
+    @Cacheable(unless="#result == null", value ="stockSearchResponses")
     public Optional<Stock> getSingleStockById(String Id) {
         return stocksRepository.findById(Id);
     }
 
 //    get stock by title
-    @Cacheable("companySearchResponses")
+    @Cacheable(unless="#result == null", value ="companySearchResponses")
     public List<Company> searchCompany(String title ){
         return companyRepository.findByTickerOrCompanyName(title,title);
     }
 
-    @Cacheable("stockSearchResponses")
+    @Cacheable(unless="#result == null", value ="stockSearchResponses")
     public Stock getStockData(String ticker) {
         List<Stock> stock = stocksRepository.findByTicker(ticker);
         return stock.get(0);
     }
 
+    @Cacheable(unless="#result == null", value ="stocksSearchResponses")
     public List<Stock> searchWithQuery(String title) {
         List<Company> companies = searchCompany(title);
         List<Stock> stocks = new ArrayList<>();

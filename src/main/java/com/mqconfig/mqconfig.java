@@ -15,7 +15,7 @@ public class mqconfig {
 
     @Bean
     public Queue queue(){
-        return new Queue("stocksSender");
+        return new Queue("stocksSender1");
     }
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
