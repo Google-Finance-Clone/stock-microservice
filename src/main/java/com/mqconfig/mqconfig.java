@@ -10,6 +10,6 @@ public class mqconfig {
 
     @Bean
     public Queue queue(){
-        return new Queue("stocks");
+        return new Queue("stocksQueue");
     }
 }
