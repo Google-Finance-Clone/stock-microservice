@@ -7,6 +7,7 @@ import com.stocksmicroservice.repositories.CompanyRepository;
 import com.stocksmicroservice.repositories.StocksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 public class StocksService {
@@ -29,6 +32,9 @@ public class StocksService {
     private final RestTemplate restTemplate;
     private final CompanyRepository companyRepository;
     private String today;
+
+    private final int initialThreadCount;
+    private ExecutorService threadPool;
 
     public String fetchStockData() {
         //   String url = "https://api.polygon.io/v1/open-close/TSLA/2023-01-09?adjusted=true&";
@@ -51,11 +57,35 @@ public class StocksService {
     }
 
     @Autowired
-    public StocksService(StocksRepository stocksRepository, CompanyRepository companyRepository, RestTemplate restTemplate) {
+    public StocksService(StocksRepository stocksRepository, CompanyRepository companyRepository, RestTemplate restTemplate, @Value("${app.thread-count}") int initialThreadCount) {
         this.stocksRepository = stocksRepository;
         this.companyRepository = companyRepository;
         this.restTemplate = restTemplate;
         this.today = "2022-04-14";
+        this.initialThreadCount = initialThreadCount;
+        threadPool = Executors.newFixedThreadPool(initialThreadCount);
+        System.out.println("valueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" + " " +threadPool  );
+        System.out.println("2222222222222222222222222222222222222222222"+ " "+ initialThreadCount);
+    }
+    public void freeze() {
+        // release resources
+//        releaseDatabaseConnections();
+        stopThreads();
+    }
+
+    public void unfreeze() {
+        // acquire resources
+//        acquireDatabaseConnections();
+        startThreads();
+    }
+
+
+    public void stopThreads() {
+        threadPool.shutdown();
+    }
+
+    public void startThreads() {
+        threadPool = Executors.newFixedThreadPool(initialThreadCount);
     }
 
 

@@ -30,6 +30,9 @@ public class StocksController {
     private final StocksService stocksService;
     private final SearchService searchService;
 
+    private final Object lock = new Object();
+    private boolean freezeFlag = false;
+
     @Autowired
     MQSender mqSender;
 
@@ -47,14 +50,14 @@ public class StocksController {
     }
 
 
-    @PostMapping("/testRabbitMQ")
-    public String postMessage(@RequestBody String message){
-        System.out.println("message sent");
-        Gson gson = new Gson();
-        JsonObject messageObject = gson.fromJson(message, JsonObject.class);
-        sendToQueue(messageObject.toString());
-        return "Message sent to the RabbitMQ Successfully";
-    }
+    // @PostMapping("/testRabbitMQ")
+    // public String postMessage(@RequestBody String message){
+    //     System.out.println("message sent");
+    //     Gson gson = new Gson();
+    //     JsonObject messageObject = gson.fromJson(message, JsonObject.class);
+    //     sendToQueue(messageObject.toString());
+    //     return "Message sent to the RabbitMQ Successfully";
+    // }
 
     @RabbitListener(queues = "stocksSender1")
     public String receiveMessage(String message) {
@@ -231,4 +234,33 @@ public class StocksController {
 //    public String postMessage(@RequestBody String message){
 //        return sendToQueue(message);
 //}
+//     @PostMapping
+//     public String postMessage(@RequestBody String message){
+//         return sendToQueue(message);
+// }
+
+    @PostMapping("/freeze")
+    public boolean freeze() {
+        System.out.print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" + " " + freezeFlag );
+
+        synchronized (lock) {
+            freezeFlag = true;
+            stocksService.freeze();
+        }
+        return freezeFlag;
+    }
+
+    @PostMapping("/unfreeze")
+    public boolean unfreeze() {
+        System.out.print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" + " " + freezeFlag );
+
+        synchronized (lock) {
+            freezeFlag = false;
+            lock.notifyAll();
+            stocksService.unfreeze();
+        }
+        return freezeFlag;
+    }
+
+
 }
