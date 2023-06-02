@@ -6,6 +6,7 @@ import com.stocksmicroservice.collections.*;
 import com.stocksmicroservice.repositories.CompanyRepository;
 import com.stocksmicroservice.repositories.StocksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -62,20 +63,22 @@ public class StocksService {
         return stocksRepository.findAll();
     }
 
+    @Cacheable("stocks")
     public Stock getStockDataOnDate(String ticker, String date) {
         return stocksRepository.findByTickerAndDate(ticker, date);
     }
-
+    @Cacheable("stockCloses")
     public double getCloseOnDay(String ticker, String date) {
         Stock stock = stocksRepository.findByTickerAndDate(ticker, date);
         return stock.getClose();
     }
 
-
+    @Cacheable("companies")
     public Company getCompanyData(String ticker) {
         return companyRepository.findByTicker(ticker);
     }
 
+    @Cacheable("stockGraphs")
     public ArrayList<Stock> getStockGraph(String ticker, String interval) {
         String[] date = today.split("-");
         int year = Integer.parseInt(date[0]);
@@ -271,7 +274,7 @@ public class StocksService {
         return result;
     }
 
-
+    @Cacheable("stockPrices")
     public Stock getCurrentPrice(String ticker) {
         return stocksRepository.findByTickerAndDate(ticker, today);
     }

@@ -6,12 +6,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Date;
 
 @Data
 @Document(collection = "stocks")
-public class Stock {
+public class Stock implements Serializable {
     @Id
     private String id;
     private String Ticker;
