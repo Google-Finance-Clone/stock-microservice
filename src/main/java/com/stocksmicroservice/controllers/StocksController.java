@@ -58,13 +58,19 @@ public class StocksController {
     @RabbitListener(queues = "stocksSender")
     public String receiveMessage(String message) {
 
+        System.out.println("message received");
+
         //{ method: (get,post,etc),
         //route: stocks/{ticker},
         //body:{if needed},
         //correlationId: notused }
-        Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
-//        JsonObject request = gson.fromJson(message, JsonObject.class);
-        JsonObject request = JsonParser.parseString(message).getAsJsonObject();
+
+        Gson gson = new Gson();
+
+//        remove first and last character from message
+        message = message.replace("\\", "");
+
+        JsonObject request = gson.fromJson(message, JsonObject.class);
 
         // Check if status attribute exists in the request object
 
@@ -76,138 +82,59 @@ public class StocksController {
          //split route by '/'
         String[] routeSplit = route.split("/");
         String response = "";
-        Object responseValue = "";
+        String responseValue = "";
         //switch case on routeSplit[1]
         switch (routeSplit[1]) {
             case "close": {
                 String ticker = routeSplit[2];
                 String date = routeSplit[3];
-                responseValue = stocksService.getCloseOnDay(ticker, date);
+                double res = stocksService.getCloseOnDay(ticker, date);
+                responseValue = String.valueOf(res);
+                return responseValue;
                 //return response as JSON
             }
-            ;
-            break;
             case "company": {
                 String ticker = routeSplit[2];
-                responseValue = stocksService.getCompanyData(ticker);
+                Company res = stocksService.getCompanyData(ticker);
+                responseValue = gson.toJson(res);
+                return responseValue;
             }
-            ;
-            break;
             case "graph": {
                 String interval = routeSplit[2];
                 String ticker = routeSplit[3];
-                responseValue = stocksService.getStockGraph(ticker, interval);
+                responseValue = gson.toJson(stocksService.getStockGraph(ticker, interval));
+                return responseValue;
             }
-            ;
             case "search": {
                 String query = routeSplit[2];
-                responseValue = searchService.searchWithQuery(query);
-            };break;
+                responseValue = gson.toJson(searchService.searchWithQuery(query));
+                return responseValue;
+            }
             case "findById": {
                 String id = routeSplit[2];
-                responseValue = searchService.getSingleStockById(id);
-            };
-            break;
+                responseValue = gson.toJson(searchService.getSingleStockById(id));
+                return responseValue;
+            }
             default: {
                 //It's just a ticker
                 if (routeSplit.length == 2) {
+                    System.out.println("You Are Here");
                     String ticker = routeSplit[1];
-                    responseValue = stocksService.getCurrentPrice(ticker);
+                    responseValue = gson.toJson(stocksService.getCurrentPrice(ticker));
+                    System.out.println("The response value is "+ responseValue);
+//                    print the type of the response value
+                    System.out.println("The type of the response value is "+ responseValue.getClass().getName());
+                    return responseValue;
                 }
                 //It's a ticker and a date
                 else {
                     String ticker = routeSplit[1];
                     String date = routeSplit[2];
-                    responseValue = stocksService.getStockDataOnDate(ticker, date);
+                    responseValue = gson.toJson(stocksService.getStockDataOnDate(ticker, date));
+                    return responseValue;
                 }
             }
         }
-        response = new Gson().toJson(responseValue);
-        return response;
-
-
-//        String[] datesplit = date.split("-");
-//
-//        String day = datesplit[2];
-//        String month = datesplit[1];
-//        String annual = datesplit[0];
-//
-//        System.out.println("day:" + day);
-//        System.out.println("month:" + month);
-//        System.out.println("annual:" + annual);
-//
-//
-//        if (method.equals("get")) {
-//            if(submethod.equals("getCompanyData"))
-//            {
-//                Company company = stocksService.getCompanyData(ticker);
-//                System.out.println("Returned Company for Company:" + company);
-//                JsonObject response = new JsonObject();
-//                response.addProperty("correlationId", correlationId);
-//                response.addProperty("status", "success");
-//                response.addProperty("body", gson.toJson(company));
-//                sendToQueue(response.toString());
-//            }
-//            else if(submethod.equals("getClosePrice"))
-//            {
-//                double price = stocksService.getCloseOnDay(ticker, date);
-//                System.out.println("Returned Price For Close Price:" + price);
-//                JsonObject response = new JsonObject();
-//                response.addProperty("correlationId", correlationId);
-//                response.addProperty("status", "success");
-//                response.addProperty("body", price);
-//                sendToQueue(response.toString());
-//            }
-//            else if(submethod.equals("getCurrentPrice"))
-//            {
-//                Stock stock = stocksService.getCurrentPrice(ticker);
-//                System.out.println("Returned Stock For Current Price:" + stock);
-//                JsonObject response = new JsonObject();
-//                response.addProperty("correlationId", correlationId);
-//                response.addProperty("status", "success");
-//                response.addProperty("body", gson.toJson(stock));
-//                sendToQueue(response.toString());
-//            }
-//            else if(submethod.equals("getStockDataOnDate"))
-//            {
-//                Stock stock = stocksService.getStockDataOnDate(ticker, date);
-//                System.out.println("Returned Stock For Current Price:" + stock);
-//                JsonObject response = new JsonObject();
-//                response.addProperty("correlationId", correlationId);
-//                response.addProperty("status", "success");
-//                response.addProperty("body", gson.toJson(stock));
-//                sendToQueue(response.toString());
-//            }
-//            else if(submethod.equals("getStockGraphAnnual"))
-//            {
-//                ArrayList<Stock> stocks = stocksService.getStockGraph(ticker, annual);
-//                System.out.println("Returned Stock List For Stock Graph Annual:" + stocks);
-//                JsonObject response = new JsonObject();
-//                response.addProperty("correlationId", correlationId);
-//                response.addProperty("status", "success");
-//                response.addProperty("body", gson.toJson(stocks));
-//                sendToQueue(response.toString());
-//            }
-//            else if(submethod.equals("getStockGraphMonthly"))
-//            {
-//                ArrayList<Stock> stocks = stocksService.getStockGraph(ticker, month);
-//                System.out.println("Returned Stock List For Stock Graph Monthly:" + stocks);
-//                JsonObject response = new JsonObject();
-//                response.addProperty("correlationId", correlationId);
-//                response.addProperty("status", "success");
-//                response.addProperty("body", gson.toJson(stocks));
-//                sendToQueue(response.toString());
-//            }
-//            else if(submethod.equals("getStockGraphDaily")) {
-//                ArrayList<Stock> stocks = stocksService.getStockGraph(ticker, day);
-//                System.out.println("Returned Stock List For Stock Graph Daily:" + stocks);
-//                JsonObject response = new JsonObject();
-//                response.addProperty("correlationId", correlationId);
-//                response.addProperty("status", "success");
-//                response.addProperty("body", gson.toJson(stocks));
-//                sendToQueue(response.toString());
-//            }
-//        }
     }
 
 
