@@ -62,8 +62,11 @@ public class StocksController {
         //route: stocks/{ticker},
         //body:{if needed},
         //correlationId: notused }
-        Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+//        Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
 //        JsonObject request = gson.fromJson(message, JsonObject.class);
+        message = message.substring(1,message.length()-1);
+        message = message.replace("\\", "");
+        System.out.println(message);
         JsonObject request = JsonParser.parseString(message).getAsJsonObject();
 
         // Check if status attribute exists in the request object
@@ -76,54 +79,52 @@ public class StocksController {
          //split route by '/'
         String[] routeSplit = route.split("/");
         String response = "";
-        Object responseValue = "";
         //switch case on routeSplit[1]
         switch (routeSplit[1]) {
             case "close": {
                 String ticker = routeSplit[2];
                 String date = routeSplit[3];
-                responseValue = stocksService.getCloseOnDay(ticker, date);
+                 double responseValue = stocksService.getCloseOnDay(ticker, date);
+                 return String.valueOf(responseValue);
                 //return response as JSON
             }
-            ;
-            break;
             case "company": {
                 String ticker = routeSplit[2];
-                responseValue = stocksService.getCompanyData(ticker);
+                Company responseValue = stocksService.getCompanyData(ticker);
+                return responseValue.toString();
             }
-            ;
-            break;
             case "graph": {
                 String interval = routeSplit[2];
                 String ticker = routeSplit[3];
-                responseValue = stocksService.getStockGraph(ticker, interval);
+                ArrayList<Stock> responseValue = stocksService.getStockGraph(ticker, interval);
+                return responseValue.toString();
             }
-            ;
             case "search": {
                 String query = routeSplit[2];
-                responseValue = searchService.searchWithQuery(query);
-            };break;
+                List<Stock> responseValue = searchService.searchWithQuery(query);
+                return responseValue.toString();
+            }
             case "findById": {
                 String id = routeSplit[2];
-                responseValue = searchService.getSingleStockById(id);
-            };
-            break;
+                Optional<Stock> responseValue = searchService.getSingleStockById(id);
+                return responseValue.toString();
+            }
             default: {
                 //It's just a ticker
                 if (routeSplit.length == 2) {
                     String ticker = routeSplit[1];
-                    responseValue = stocksService.getCurrentPrice(ticker);
+                    Stock responseValue = stocksService.getCurrentPrice(ticker);
+                    return responseValue.toString();
                 }
                 //It's a ticker and a date
                 else {
                     String ticker = routeSplit[1];
                     String date = routeSplit[2];
-                    responseValue = stocksService.getStockDataOnDate(ticker, date);
+                    Stock responseValue = stocksService.getStockDataOnDate(ticker, date);
+                    return responseValue.toString();
                 }
             }
         }
-        response = new Gson().toJson(responseValue);
-        return response;
 
 
 //        String[] datesplit = date.split("-");
