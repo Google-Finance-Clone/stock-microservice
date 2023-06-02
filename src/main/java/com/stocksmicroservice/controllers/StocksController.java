@@ -22,6 +22,9 @@ public class StocksController {
 
     private final StocksService stocksService;
 
+    private final Object lock = new Object();
+    private boolean freezeFlag = false;
+
     @Autowired
     MQSender mqSender;
 
@@ -34,6 +37,17 @@ public class StocksController {
     public String sendToQueue(String message) {
         mqSender.send(message);
         return "Message sent to the RabbitMQ Successfully";
+    }
+
+    @GetMapping()
+    public String getTest(){
+
+        synchronized (lock) {
+            if (freezeFlag) {
+                // Return an error response indicating that the application is frozen
+                return "This instance is currently frozen" ;
+            } else {
+                return "Hello";} }
     }
 
     @GetMapping("/close/{ticker}/{date}")
@@ -102,4 +116,29 @@ public class StocksController {
     public String postMessage(@RequestBody String message){
         return sendToQueue(message);
 }
+
+    @PostMapping("/freeze")
+    public boolean freeze() {
+        System.out.print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" + " " + freezeFlag );
+
+        synchronized (lock) {
+            freezeFlag = true;
+            stocksService.freeze();
+        }
+        return freezeFlag;
+    }
+
+    @PostMapping("/unfreeze")
+    public boolean unfreeze() {
+        System.out.print("checkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk" + " " + freezeFlag );
+
+        synchronized (lock) {
+            freezeFlag = false;
+            lock.notifyAll();
+            stocksService.unfreeze();
+        }
+        return freezeFlag;
+    }
+
+
 }
