@@ -1,12 +1,19 @@
 package com.stocksmicroservice.controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mqconfig.MQSender;
 import com.stocksmicroservice.collections.Company;
 import com.stocksmicroservice.collections.Stock;
+import com.stocksmicroservice.services.SearchService;
 import com.stocksmicroservice.services.StocksService;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Array;
@@ -21,20 +28,138 @@ import java.util.Optional;
 public class StocksController {
 
     private final StocksService stocksService;
+    private final SearchService searchService;
 
     @Autowired
     MQSender mqSender;
 
     @Autowired
-    public StocksController(StocksService stocksService) {
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    public StocksController(StocksService stocksService, SearchService searchService) {
         this.stocksService = stocksService;
+        this.searchService = searchService;
+    }
+
+    public void sendToQueue(String message) {
+        rabbitTemplate.convertAndSend("stocksQueue", message);
     }
 
 
-    public String sendToQueue(String message) {
-        mqSender.send(message);
+    @PostMapping("/testRabbitMQ")
+    public String postMessage(@RequestBody String message){
+        System.out.println("message sent");
+        Gson gson = new Gson();
+        JsonObject messageObject = gson.fromJson(message, JsonObject.class);
+        sendToQueue(messageObject.toString());
         return "Message sent to the RabbitMQ Successfully";
     }
+
+    @RabbitListener(queues = "stocksSender1")
+    public String receiveMessage(String message) {
+
+        System.out.println("message received");
+
+        //{ method: (get,post,etc),
+        //route: stocks/{ticker},
+        //body:{if needed},
+        //correlationId: notused }
+
+        Gson gson = new Gson();
+
+//        remove first and last character from message
+        message = message.replace("\\", "");
+
+        JsonObject request = gson.fromJson(message, JsonObject.class);
+
+        // Check if status attribute exists in the request object
+
+        String correlationId = request.get("correlationId").getAsString();
+        String route = request.get("route").getAsString();
+        String method = request.get("method").getAsString();
+        method = method.toLowerCase();
+        JsonObject body = request.get("body").getAsJsonObject();
+         //split route by '/'
+        String[] routeSplit = route.split("/");
+        String response = "";
+        String responseValue = "";
+        //switch case on routeSplit[1]
+        switch (routeSplit[1]) {
+            case "close": {
+                String ticker = routeSplit[2];
+                String date = routeSplit[3];
+                double res = stocksService.getCloseOnDay(ticker, date);
+                responseValue = String.valueOf(res);
+                return responseValue;
+            }
+            case "company": {
+                String ticker = routeSplit[2];
+                Company res = stocksService.getCompanyData(ticker);
+                if(res != null)
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given date";
+                return responseValue;
+            }
+            case "graph": {
+                String interval = routeSplit[2];
+                String ticker = routeSplit[3];
+                ArrayList<Stock> res = stocksService.getStockGraph(ticker, interval);
+                if(res != null)
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given date";
+                return responseValue;
+            }
+            case "search": {
+                String query = routeSplit[2];
+                List<Stock> res = searchService.searchWithQuery(query);
+                if(res != null)
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given date";
+                return responseValue;
+            }
+            case "findById": {
+                String id = routeSplit[2];
+                Optional<Stock> res = searchService.getSingleStockById(id);
+                if(res.isPresent())
+                    responseValue = gson.toJson(res);
+                else
+                    responseValue = "No data found for the given id";
+                return responseValue;
+            }
+            default: {
+                //It's just a ticker
+                if (routeSplit.length == 2) {
+                    System.out.println("You Are Here");
+                    String ticker = routeSplit[1];
+                    Stock res = stocksService.getCurrentPrice(ticker);
+                    if(res != null)
+                        responseValue = gson.toJson(res);
+                    else
+                        responseValue = "No data found for the given date";
+                    System.out.println("The response value is "+ responseValue);
+//                    print the type of the response value
+                    System.out.println("The type of the response value is "+ responseValue.getClass().getName());
+                    return responseValue;
+                }
+                //It's a ticker and a date
+                else {
+                    String ticker = routeSplit[1];
+                    String date = routeSplit[2];
+                    Stock res = stocksService.getStockDataOnDate(ticker, date);
+                    if(res != null)
+                        responseValue = gson.toJson(res);
+                    else
+                        responseValue = "No data found for the given date";
+                    return responseValue;
+                }
+            }
+        }
+    }
+
 
     @GetMapping("/close/{ticker}/{date}")
     public double getClosePrice(@PathVariable String ticker, @PathVariable String date)
@@ -64,11 +189,13 @@ public class StocksController {
     {
         return stocksService.getStockGraph(ticker, "annual");
     }
+
     @GetMapping("graph/monthly/{ticker}")
     public ArrayList<Stock> getStockGraphMonthly(@PathVariable String ticker)
     {
         return stocksService.getStockGraph(ticker, "monthly");
     }
+
     @GetMapping("graph/daily/{ticker}")
     public ArrayList<Stock> getStockGraphDaily(@PathVariable String ticker)
     {
@@ -97,9 +224,11 @@ public class StocksController {
 //        return result;
 //    }
 
+
+
 //    create post mapping with message as an input
-    @PostMapping
-    public String postMessage(@RequestBody String message){
-        return sendToQueue(message);
-}
+//    @PostMapping
+//    public String postMessage(@RequestBody String message){
+//        return sendToQueue(message);
+//}
 }

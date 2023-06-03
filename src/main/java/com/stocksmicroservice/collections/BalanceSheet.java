@@ -3,9 +3,11 @@ package com.stocksmicroservice.collections;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
+
 @Data
 @Document
-public class BalanceSheet {
+public class BalanceSheet implements Serializable {
     private String CashAndShortTermInvestments;
     private String totalAssets;
     private String totalLiabilities;
